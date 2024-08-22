@@ -29,9 +29,10 @@ def main(stdscr):
 
             for row in cont:
                 buf.append([ord(c) for c in row])
-
     except:
         buf.append([])
+
+    editor_state = "Insert"
 
     while True:
         ch = -1
@@ -41,8 +42,8 @@ def main(stdscr):
         if r < y:
             y = r
 
-        if r >= y + R:
-            y = r - R + 1
+        if r >= y + R - 2:
+            y = r - R + 3
 
         if c < x:
             x = c
@@ -52,7 +53,7 @@ def main(stdscr):
 
         #Print
 
-        for row in range(R):
+        for row in range(R - 2):
             buf_row = row + y
 
             row_str = str(buf_row)
@@ -74,6 +75,7 @@ def main(stdscr):
                 s.addch('\n')
             except:
                 pass
+        s.addstr(R - 1, 0, editor_state)
 
         curses.curs_set(False)
         s.move(r-y, margin_l + c-x)
