@@ -8,6 +8,7 @@ def main(stdscr):
     s.nodelay(True)
     curses.noecho()
     curses.raw()
+    curses.set_escdelay(1)
     s.keypad(True)
 
     buf = []
@@ -85,11 +86,11 @@ def main(stdscr):
         while ch == -1:
             ch = s.getch()
 
-        if ch != (ch & 0x1f) and ch < 128:
-            buf[r].insert(c, ch)
-            c += 1
-            max_c += 1
-
+        if ch == 27: 
+            editor_state = "Normal"
+            curses.curs_set(0)
+        elif ch == ord("i") and editor_state == "Normal":
+            editor_state = "Insert"
         elif chr(ch) in '\n\r': # handle enter
             line = buf[r][c:]
             buf [r] = buf[r][:c]
@@ -111,7 +112,13 @@ def main(stdscr):
                 buf[r] += line
                 c = prev_line_len
                 max_c = prev_line_len
-        elif ch == curses.KEY_RIGHT:
+        elif ch == ord("w") and editor_state == "Normal":
+            c = buf[r][c + 1:].index(ord(" ")) + c + 2 if ord(" ") in buf[r][c + 1:] else len(buf[r])
+            max_c = c
+        elif ch == ord("b") and editor_state == "Normal" and c > 0:
+            c = c - buf[r][:c-1][::-1].index(ord(" ")) - 1 if ord(" ") in buf[r][:c - 1] else 0
+            max_c = c
+        elif ch == curses.KEY_RIGHT or (editor_state == "Normal" and ch == ord('l')):
             if c < len(buf[r]):
                 c += 1
                 max_c += 1
@@ -119,7 +126,7 @@ def main(stdscr):
                 r += 1
                 c = 0
                 max_c = 0
-        elif ch == curses.KEY_LEFT:
+        elif ch == curses.KEY_LEFT or (editor_state == "Normal" and ch == ord('h')):
             if c > 0:
                 c -= 1
                 max_c -= 1
@@ -127,12 +134,17 @@ def main(stdscr):
                 r -= 1
                 c = len(buf[r])
                 max_c = len(buf[r])
-        elif ch == curses.KEY_UP and r != 0:
+        elif ch == curses.KEY_UP and r != 0 or(r != 0 and editor_state == "Normal" and ch == ord('k')):
             r -= 1
             c = max_c
-        elif ch == curses.KEY_DOWN and r < len(buf) - 1:
+        elif ch == curses.KEY_DOWN and r < len(buf) - 1 or (r < len(buf) - 1 and editor_state == "Normal" and ch == ord('j')):
             r += 1
             c = max_c
+        elif editor_state == "Insert" and ch != (ch & 0x1f) and ch < 128:
+            buf[r].insert(c, ch)
+            c += 1
+            max_c += 1
+
 
         if ch == (ord("q") & 0x1f): #Ctrl-Q quits
             sys.exit()
