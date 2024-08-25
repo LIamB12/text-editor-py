@@ -4,6 +4,7 @@ import os
 
 PY_LANGUAGE = Language(tspython.language())
 parser = Parser(PY_LANGUAGE)
+
 string_node_types = ["integer", "string_content", "string_start", "string_end"]
 keyword_node_types = ["import", "def", "for", "if", "else", "elif", "as", "while", "try", "with", "except", "pass", "raise", "class", "from", "return"]
 comment_node_types = ["comment"]
@@ -30,7 +31,6 @@ class TextBuffer:
         except:
             buf.append([])
         return TextBuffer(buf, file, "Normal")
-
 
     @staticmethod 
     def create_netrw_buffer(path):
@@ -108,12 +108,8 @@ class TextBuffer:
                 elif token == "self":
                     for i in range(node.start_point.column, node.end_point.column):
                         color_map[(node.start_point.row, i)] = 7
-
-                
-
                 
         return color_map
-
 
     @staticmethod
     def _traverse_tree(tree):
@@ -128,8 +124,7 @@ class TextBuffer:
             elif cursor.goto_next_sibling():
                 visited_children = False
             elif not cursor.goto_parent():
-                break
-        
+                break        
         
     def to_bytes(self):
         buf_to_chars = []
@@ -138,7 +133,6 @@ class TextBuffer:
             buf_to_chars.append("".join(char_row))
 
         return bytes("\n".join(buf_to_chars), encoding="utf-8")
-
 
     def to_string(self):
         buf_to_chars = []
