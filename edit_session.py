@@ -1,7 +1,7 @@
 import curses
 import sys
 from text_buffer import TextBuffer
-from colors import init_rose_pine
+from colors import init_rose_pine, init_white
 
 class EditSession:
     
@@ -96,6 +96,7 @@ class EditSession:
         for index, buffer in enumerate(self.buffer_list):
             if buffer.filename == new_filename:
                 self.current_buffer = index
+                init_white()
                 self.screen.clear()
                 return
 
@@ -103,6 +104,7 @@ class EditSession:
 
         self.buffer_list.append(files_buffer)
         self.current_buffer = len(self.buffer_list) - 1
+        init_white()
         self.screen.clear()
 
 
@@ -264,11 +266,13 @@ class EditSession:
             for index, buffer in enumerate(self.buffer_list):
                 if buffer.filename == new_filename:
                     self.current_buffer = index
+                    init_rose_pine()
                     self.screen.clear()
                     return
 
             self.buffer_list.append(file_buffer)
             self.current_buffer = len(self.buffer_list) - 1
+            init_rose_pine()
             self.screen.clear()
 
 
