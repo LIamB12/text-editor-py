@@ -1,6 +1,7 @@
 import curses
 import sys
 from text_buffer import TextBuffer
+from colors import init_rose_pine
 
 class EditSession:
     
@@ -8,10 +9,7 @@ class EditSession:
 
         #initialize screen
         screen = curses.initscr()
-        curses.start_color()
-        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
-        curses.init_pair(3, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+        init_rose_pine()
 
         screen.nodelay(True)
         curses.noecho()
@@ -44,8 +42,8 @@ class EditSession:
         if buf.col < buf.cursor_x:
             buf.cursor_x = buf.col
 
-        if buf.col >= buf.cursor_x + self.COL_NUM:
-            buf.cursor_x = buf.col - self.COL_NUM + 1
+        if buf.col >= buf.cursor_x + self.COL_NUM - self.get_left_margin():
+            buf.cursor_x = buf.col - self.COL_NUM + self.get_left_margin() + 1
 
     def print_screen(self):
         buf = self.get_current_buffer()
@@ -56,9 +54,9 @@ class EditSession:
 
             row_str = str(buf_row)
             num_spaces = (max((len(str(len(buf.buf)))), len(str(self.ROW_NUM))) - len(row_str))
-            line_num_str = " " * num_spaces + row_str + "  |" 
+            line_num_str = " " * num_spaces + row_str + " " 
 
-            self.screen.addstr(row, 0, line_num_str)
+            self.screen.addstr(row, 0, line_num_str, curses.color_pair(9))
             for col in range(self.COL_NUM):
                 buf_col = col + buf.cursor_x
                 try:
@@ -90,7 +88,7 @@ class EditSession:
 
     def get_left_margin(self):
         buf = self.get_current_buffer()
-        return max(len(str(len(buf.buf))), len(str(self.ROW_NUM))) + 4
+        return max(len(str(len(buf.buf))), len(str(self.ROW_NUM))) + 2
 
     
 
@@ -125,6 +123,16 @@ class EditSession:
         elif key == (ord("q") & 0x1f): #Ctrl-Q quits
             sys.exit()
 
+        if key == (ord("s") & 0x1f): #Ctrl-S quits
+            buf = self.get_current_buffer()
+            cont = ''
+            for line in buf.buf:
+                for ascii_char in line:
+                    cont += chr(ascii_char)
+                cont += '\n'
+            with open(buf.filename, "w") as file:
+                file.write(cont)
+
 
         elif key != (key & 0x1f) and key < 128:
             buf.buf[buf.row].insert(buf.col, key)
@@ -146,15 +154,21 @@ class EditSession:
                 buf.col = prev_line_len
                 buf.jump_to_col = prev_line_len
 
-
-
-        
-
     def _handle_normal_mode_key_press(self, key):
         buf = self.get_current_buffer()
 
         if key == (ord("q") & 0x1f): #Ctrl-Q quits
             sys.exit()
+
+        elif key == (ord("s") & 0x1f): #Ctrl-S quits
+            buf = self.get_current_buffer()
+            cont = ''
+            for line in buf.buf:
+                for ascii_char in line:
+                    cont += chr(ascii_char)
+                cont += '\n'
+            with open(buf.filename, "w") as file:
+                file.write(cont)
 
         elif key == ord("i"): 
             buf.state = "Insert"
@@ -181,7 +195,7 @@ class EditSession:
             buf.row -= 1
             buf.col = buf.jump_to_col
 
-        elif (key == curses.KEY_DOWN or key == ord("j")) and buf.row < len(buf.buf):
+        elif (key == curses.KEY_DOWN or key == ord("j")) and buf.row < len(buf.buf) - 1:
             buf.row += 1
             buf.col = buf.jump_to_col
 
