@@ -4,6 +4,7 @@ A basic text editor written in python
 
 - 'hjkl' to move cursor in Normal mode
 - "i" to enter insert mode
+- "Esc" to return to Normal mode
 - Ctrl-S writes to file
 - Ctrl-Q quits
 - Ctrl-F swtiches to file explorer buffer
