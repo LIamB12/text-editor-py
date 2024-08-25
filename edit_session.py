@@ -19,7 +19,7 @@ class EditSession:
         R, C = screen.getmaxyx() 
 
         #initialze buffer
-        buffer = TextBuffer(filename)
+        buffer = TextBuffer.buffer_from_file(filename)
 
         self.buffer_list = [buffer]
         self.screen = screen
@@ -71,7 +71,7 @@ class EditSession:
             except:
                 pass
 
-        self.screen.addstr(self.ROW_NUM - 1, 0, buf.state)
+        self.screen.addstr(self.ROW_NUM - 1, 0, buf.state + "      " + buf.filename + "       " + str([x.filename for x in self.buffer_list]))
 
     def update_cursor(self):
         buf = self.get_current_buffer()
@@ -90,6 +90,23 @@ class EditSession:
         buf = self.get_current_buffer()
         return max(len(str(len(buf.buf))), len(str(self.ROW_NUM))) + 2
 
+    def view_files(self):
+
+        new_filename = "./"
+        for index, buffer in enumerate(self.buffer_list):
+            if buffer.filename == new_filename:
+                self.current_buffer = index
+                self.screen.clear()
+                return
+
+        files_buffer = TextBuffer.create_netrw_buffer(new_filename)
+
+        self.buffer_list.append(files_buffer)
+        self.current_buffer = len(self.buffer_list) - 1
+        self.screen.clear()
+
+
+
     
 
     def handle_key_press(self, key):
@@ -98,7 +115,11 @@ class EditSession:
 
         if mode == "Insert":
             self._handle_insert_mode_key_press(key)
-        if mode == "Normal":
+        elif mode == "Normal":
+            self._handle_normal_mode_key_press(key)
+        elif mode == "Netrw" or mode == "Netrwl":
+            self._handle_netrw_mode_key_press(key)
+        else:
             self._handle_normal_mode_key_press(key)
 
 
@@ -198,5 +219,56 @@ class EditSession:
         elif (key == curses.KEY_DOWN or key == ord("j")) and buf.row < len(buf.buf) - 1:
             buf.row += 1
             buf.col = buf.jump_to_col
+
+        elif (key == (ord("F") & 0x1f)):
+            self.view_files()
+
+    def _handle_netrw_mode_key_press(self, key):
+        buf = self.get_current_buffer()
+
+        if key == (ord("q") & 0x1f): #Ctrl-Q quits
+            sys.exit()
+
+        elif key == curses.KEY_RIGHT or key == ord('l'):
+            if buf.col < len(buf.buf[buf.row]):
+                buf.col += 1
+                buf.jump_to_col += 1
+            elif buf.row < len(buf.buf) - 1:
+                buf.row += 1
+                buf.col = 0
+                buf.jump_to_col = 0
+
+        elif key == curses.KEY_LEFT or key == ord('h'):
+            if buf.col > 0:
+                buf.col -= 1
+                buf.jump_to_col -= 1
+            elif buf.row > 0:
+                buf.row -= 1
+                buf.col = len(buf.buf[buf.row])
+                buf.jump_to_col = len(buf.buf[buf.row])
+
+        elif (key == curses.KEY_UP or key == ord("k")) and buf.row != 0:
+            buf.row -= 1
+            buf.col = buf.jump_to_col
+
+        elif (key == curses.KEY_DOWN or key == ord("j")) and buf.row < len(buf.buf) - 1:
+            buf.row += 1
+            buf.col = buf.jump_to_col
+
+        elif (key == curses.KEY_ENTER or key == 10):
+            current_buffer = self.get_current_buffer()
+            filenames = current_buffer.to_line_array()
+            new_filename = current_buffer.filename + filenames[current_buffer.row]
+            file_buffer = TextBuffer.buffer_from_file(new_filename)
+
+            for index, buffer in enumerate(self.buffer_list):
+                if buffer.filename == new_filename:
+                    self.current_buffer = index
+                    self.screen.clear()
+                    return
+
+            self.buffer_list.append(file_buffer)
+            self.current_buffer = len(self.buffer_list) - 1
+            self.screen.clear()
 
 
