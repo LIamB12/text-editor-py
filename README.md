@@ -4,7 +4,8 @@
 - Uses curses library to display cursor and print text to screen
 - Implements common vim motions
 - Allows file navigation and manages open buffers
-- Syntax Highlighting and python AST generation through tree-sitter
+- Syntax Highlighting using the rose-pine palette
+- AST generation with tree-sitter for parsing python files 
 
 ## Motions / Controls
 
