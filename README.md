@@ -3,6 +3,8 @@ A terminal text editor written in python
 ## Motions / Controls
 
 - 'hjkl' to move cursor in Normal mode
+- 'w' to jump word by word
+- 'g' and 'G' to jump to start/end of page
 - "i" to enter insert mode
 - "Esc" to return to Normal mode
 - Ctrl-S writes to file
