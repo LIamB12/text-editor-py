@@ -5,7 +5,9 @@ A terminal text editor written in python
 - 'hjkl' to move cursor in Normal mode
 - 'w' to jump word by word
 - 'g' and 'G' to jump to start/end of page
-- "i" to enter insert mode
+- "i" to enter insert mode before the current character
+- 'a' to enter insert mode after the current character
+- 'A' to enter insert mode at the end of the line
 - "Esc" to return to Normal mode
 - Ctrl-S writes to file
 - Ctrl-Q quits
