@@ -1,4 +1,4 @@
-A basic text editor written in python
+A terminal text editor written in python
 
 ## Motions / Controls
 
