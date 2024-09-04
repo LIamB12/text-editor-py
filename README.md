@@ -1,4 +1,9 @@
+## Description
+
 A terminal text editor written in python
+Uses curses library to display cursor and print text to screen
+Implements common vim motions
+Allows file navigation and manages open buffers
 
 ## Motions / Controls
 
