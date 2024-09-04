@@ -12,6 +12,8 @@ A terminal text editor written in python
 - Ctrl-S writes to file
 - Ctrl-Q quits
 - Ctrl-F swtiches to file explorer buffer
+
+  ## Screenshots
   
 ![Screenshot from 2024-08-25 15-00-56](https://github.com/user-attachments/assets/6ba1ab2b-a86b-4b18-a72f-537925a462ae)
 
