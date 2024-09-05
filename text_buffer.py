@@ -10,6 +10,10 @@ keyword_node_types = ["import", "def", "for", "if", "else", "elif", "as", "while
 comment_node_types = ["comment"]
 operation_node_types = ["in", "and", "or", ",", ".","=", ">", "<", "/", "[", "]", "}", "{", "(", ")", "*", "+", "-", "/", ":", "==", "!=", ">=", "<=", "+=", "-=", "*=", "/=", "&", "|"]
 
+word_chars = [97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 95]
+separators = [59, 58, 42, 94, 38, 37, 36, 35, 64, 33, 43, 61, 45, 96, 126, 92, 44, 46, 47, 63, 62, 60, 61, 40, 41, 123, 125, 91, 93, 39, 34]
+
+
 class TextBuffer:
 
     def __init__(self, buffer, filename, initial_state):
@@ -41,6 +45,72 @@ class TextBuffer:
         except:
             buf.append([])
         return TextBuffer(buf, path, "Netrw")
+
+    def get_last_word_col(self):
+
+        if self.col == 0:
+            if self.row > 0:
+                self.row -= 1
+                return len(self.buf[self.row]) - 1 if len(self.buf[self.row]) - 1 > 0 else 0
+
+            else:
+                return self.col
+
+        if self.buf[self.row] == []:
+            self.row -= 1
+            return len(self.buf[self.row]) - 1
+    
+
+        found_non_word_char = self.buf[self.row][self.col] in separators or self.buf[self.row][self.col] not in word_chars
+        for index in range(self.col - 1, 0, -1):
+            char = self.buf[self.row][index]
+            if found_non_word_char:
+                if char in separators or char in word_chars:
+                    return index
+            elif char in separators:
+                return index
+            elif char not in word_chars:
+                found_non_word_char = True
+        
+        
+        if self.row == 0:
+            return self.col
+        else:
+            self.row -= 1
+            return len(self.buf[self.row]) - 1 if len(self.buf[self.row]) - 1 > 0 else 0
+
+
+    def get_next_word_col(self):
+
+        if self.col == len(self.buf[self.row]):
+            if self.row < len(self.buf) - 1:
+                self.row += 1
+                return 0
+            else:
+                return self.col
+
+        if self.buf[self.row] == []:
+            self.row += 1
+            return 0
+    
+
+        found_non_word_char = self.buf[self.row][self.col] in separators or self.buf[self.row][self.col] not in word_chars
+        for index in range(self.col + 1, len(self.buf[self.row])):
+            char = self.buf[self.row][index]
+            if found_non_word_char:
+                if char in separators or char in word_chars:
+                    return index
+            elif char in separators:
+                return index
+            elif char not in word_chars:
+                found_non_word_char = True
+        
+        
+        if self.row == len(self.buf) - 1:
+            return self.col
+        else:
+            self.row += 1
+            return 0
 
     def parse_buffer(self):
         color_map = {}

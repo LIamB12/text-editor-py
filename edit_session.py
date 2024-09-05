@@ -71,7 +71,7 @@ class EditSession:
             except:
                 pass
 
-        self.screen.addstr(self.ROW_NUM - 1, 0, buf.state + "      " + buf.filename + "       " + str([x.filename for x in self.buffer_list]))
+        self.screen.addstr(self.ROW_NUM - 1, 0, buf.state + "      Current Buffer: " + buf.filename + "       Open Buffers: " + str([x.filename for x in self.buffer_list]))
 
     def update_cursor(self):
         buf = self.get_current_buffer()
@@ -115,11 +115,14 @@ class EditSession:
         buf = self.get_current_buffer()
         mode = buf.state
 
+        if False:
+            print(key)
+
         if mode == "Insert":
             self._handle_insert_mode_key_press(key)
         elif mode == "Normal":
             self._handle_normal_mode_key_press(key)
-        elif mode == "Netrw" or mode == "Netrwl":
+        elif mode == "Netrw":
             self._handle_netrw_mode_key_press(key)
         else:
             self._handle_normal_mode_key_press(key)
@@ -142,6 +145,11 @@ class EditSession:
             buf = self.get_current_buffer()
             buf.state = "Normal"
 
+        elif key == 9:
+            for _ in range(4):
+                buf.buf[buf.row].insert(buf.col, key)
+                buf.col += 1
+                buf.jump_to_col += 1
         
         elif key == (ord("q") & 0x1f): #Ctrl-Q quits
             sys.exit()
@@ -158,6 +166,7 @@ class EditSession:
 
 
         elif key != (key & 0x1f) and key < 128:
+
             buf.buf[buf.row].insert(buf.col, key)
             buf.col += 1
             buf.jump_to_col += 1
@@ -195,6 +204,30 @@ class EditSession:
 
         elif key == ord("i"): 
             buf.state = "Insert"
+        
+        elif key == ord("w"): 
+            buf.col = buf.get_next_word_col()
+            buf.jump_to_col = buf.col
+        
+        elif key == ord("a"): 
+            buf.col += 1
+            buf.jump_to_col = buf.col
+            buf.state = "Insert"
+        
+        elif key == ord("A"): 
+            buf.col = len(buf.buf[buf.row])
+            buf.jump_to_col = buf.col
+            buf.state = "Insert"
+        
+        # elif key == ord("b"): 
+            # buf.col = buf.get_last_word_col()
+            # buf.jump_to_col = buf.col
+        
+        elif key == ord("G"): 
+            buf.row = len(buf.buf) - 1
+
+        elif key == ord("g"): 
+            buf.row = 0
         
         elif key == curses.KEY_RIGHT or key == ord('l'):
             if buf.col < len(buf.buf[buf.row]):
